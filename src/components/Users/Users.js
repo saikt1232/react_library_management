@@ -1,40 +1,42 @@
-import React, {Component} from 'react';
-import {Table, Button} from 'react-bootstrap';
+import React, { Component } from 'react';
+import { Table, Button } from 'react-bootstrap';
 import axios from 'axios';
+import User from './user';
 
 class Users extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            users: []
+            users: [],
+            showEdit: false
         }
     }
 
-    removeRecord(id) {
-        axios.delete(`http://localhost:3000/users/${id}`)
-            .then(() => {
-                axios.get("http://localhost:3000/users")
-                    .then(res => {
-                        this.setState({users: res.data})
-                    });
-            });
-    }
+    
 
     addRecord() {
         let name = document.getElementById("name");
-        axios.post("http://localhost:3000/users", {"name": name.value}).then(() => {
+        axios.post("http://localhost:3000/users", { "name": name.value }).then(() => {
             name.value = "";
             axios.get("http://localhost:3000/users")
                 .then(res => {
-                    this.setState({users: res.data})
+                    this.setState({ users: res.data })
                 });
         })
+    }
+
+    updateList() {
+        console.log('oading new list');
+        axios.get("http://localhost:3000/users")
+            .then(res => {
+                this.setState({ users: res.data })
+            });
     }
 
     componentDidMount() {
         axios.get("http://localhost:3000/users")
             .then(res => {
-                this.setState({users: res.data})
+                this.setState({ users: res.data })
             })
     }
 
@@ -43,27 +45,21 @@ class Users extends Component {
             <div>
                 <Table striped bordered condensed hover>
                     <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Delete</th>
-                    </tr>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Delete</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    {
-                        this.state.users.map((res, key) =>
-                            <tr key={key}>
-                                <td>{res.id}</td>
-                                <td id="name_input">{res.name}</td>
-                                <td><Button bsStyle="danger" onClick={() => this.removeRecord(res.id)}>Delete
-                                    row</Button>
-                                </td>
-                            </tr>
-                        )
+                        {
+                            this.state.users.map((res, key) =>
+                            <User key={key} res={res} updateList={this.updateList.bind(this)}></User>
+                            )
                         }
                     </tbody>
                 </Table>
-                <input type="text" id="name"/>&nbsp;&nbsp;
+                <input type="text" id="name" />&nbsp;&nbsp;
                 <Button onClick={() => this.addRecord()}>Add Record</Button>
             </div>
         );
